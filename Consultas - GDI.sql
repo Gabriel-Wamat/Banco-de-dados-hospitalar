@@ -4,12 +4,24 @@ FROM Trabalha
 GROUP BY Nome_Setor
 HAVING COUNT(*) > 2;
 
+-- Função de agregação
+SELECT C.CRM, (
+    SELECT M1.NOME
+    FROM MEDICO M1 WHERE
+    M1.CRM = C.CRM
+) AS NOME, COUNT(*)
+FROM CONSULTA C
+GROUP BY C.CRM
+HAVING COUNT(*) > 1;
+
 -- Consulta 2: Junção Interna
 SELECT M.Nome AS Medico, 
-       (SELECT H.CNPJ 
-        FROM Hospital H  
-        JOIN SETOR S ON H.CNPJ = S.CNPJ) 
-FROM Medico M
+       S.Nome_setor AS Setor_Medico, 
+       H.CNPJ AS CNPJ_Hospital 
+FROM Medico M 
+JOIN Trabalha T ON M.CRM = T.CRM 
+JOIN Setor S ON T.CNPJ = S.CNPJ AND T.Nome_setor = S.Nome_setor 
+JOIN Hospital H ON S.CNPJ = H.CNPJ
 
 -- Consulta 3: Junção Externa
 SELECT M.Nome AS Medico, P.Nome AS Paciente
@@ -81,19 +93,8 @@ WHERE CRM IN (
     WHERE (CNPJ, Nome_Setor) = (
         SELECT CNPJ, Nome_Setor
         FROM Trabalha
-        WHERE CRM = 'CRM12345')
-);
+        WHERE CRM = 'CRM12345'));
 
-
--- Função de agregação
-SELECT C.CRM, (
-    SELECT M1.NOME
-    FROM MEDICO M1 WHERE
-    M1.CRM = C.CRM
-) AS NOME, COUNT(*)
-FROM CONSULTA C
-GROUP BY C.CRM
-HAVING COUNT(*) > 1;
 
 -- Consulta 8: Subconsulta do Tipo Tabela
 
