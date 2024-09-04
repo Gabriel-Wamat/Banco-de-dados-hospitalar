@@ -58,12 +58,31 @@ WHERE NOT EXISTS (
 SELECT M.Nome, 
        (SELECT COUNT(*) 
         FROM Consulta C 
-        WHERE C.CPF_Medico = M.CPF) AS Total_Consultas
+        WHERE C.CRM= M.CRM) AS Total_Consultas
 FROM Medico M;
+
+-------
+SELECT m.Nome, m.CRM
+FROM Medico m
+WHERE m.CRM = (
+    SELECT t.crm
+    FROM Trabalha t
+    WHERE CRM = 'CRM12345');
+
 
 -- Consulta 7: Subconsulta do Tipo Linha
 
 
+SELECT Nome, CRM
+FROM Medico
+WHERE CRM IN (
+    SELECT CRM
+    FROM Trabalha
+    WHERE (CNPJ, Nome_Setor) = (
+        SELECT CNPJ, Nome_Setor
+        FROM Trabalha
+        WHERE CRM = 'CRM12345')
+);
 
 
 -- Função de agregação
@@ -78,34 +97,16 @@ HAVING COUNT(*) > 1;
 
 -- Consulta 8: Subconsulta do Tipo Tabela
 
-SELECT M.Nome AS Medico, 
-       (SELECT P.Nome 
-        FROM Paciente P 
-        JOIN Consulta C ON P.CPF = C.CPF_Paciente 
-        WHERE C.CPF_Medico = M.CPF 
-        ORDER BY C.Data DESC 
-        LIMIT 1) AS Paciente_Recente
-FROM Medico M;
-
-
 -- Projete o nome do medico, nome do paciente atendido e o medicamento receitado
 SELECT M.Nome AS Nome_Medico,(SELECT P.Nome  
     				  FROM Paciente P 
       				  WHERE P.CPF_Paciente = R.CPF_Paciente) AS Nome_Paciente, (SELECT MD.Nome  
-    														  FROM Medicamento MD 
-     														  WHERE MD.Cod = R.Cod_Medicamento) AS Nome_Medicamento 
+    												    FROM Medicamento MD 
+     												    WHERE MD.Cod = R.Cod_Medicamento) AS Nome_Medicamento 
 FROM Receita R JOIN Medico M ON R.CRM = M.CRM
 
 ------------------------------------------------------------------------------------------
     
-SELECT M.Nome, C.Data
-FROM Medico M
-JOIN (
-    SELECT CPF_Medico, Data 
-    FROM Consulta 
-    WHERE Data >= '2023-01-01'
-) AS C ON M.CPF = C.CPF_Medico;
-
 -- Consulta 9: Operação de Conjunto (Union)
 SELECT CRM, Nome 
 FROM Medico
