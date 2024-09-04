@@ -12,21 +12,28 @@ SELECT M.Nome AS Medico,
 FROM Medico M
 
 -- Consulta 3: Junção Externa
-SELECT M.Nome AS Medico, P.Nome AS Paciente, C.Data
+SELECT M.Nome AS Medico, P.Nome AS Paciente
 FROM Medico M
-LEFT JOIN Consulta C ON M.CPF = C.CPF_Medico
-LEFT JOIN Paciente P ON P.CPF = C.CPF_Paciente;
+LEFT JOIN Consulta C ON M.CRM= C.CRM
+LEFT JOIN Paciente P ON P.CPF_paciente = C.CPF_Paciente;
 
--- Consulta 4: Semi Junção
-SELECT DISTINCT M.Nome
+
+ -- Consulta 4: Semi Junção - Exists // IN
+
+SELECT M.Nome
 FROM Medico M
 WHERE EXISTS (
     SELECT 1
     FROM Consulta C
-    WHERE C.CPF_Medico = M.CPF
-);
+    WHERE C.CRM= M.CRM);
 
+SELECT M.Nome
+FROM Medico M
+WHERE M.CRM IN (
+    SELECT C.CRM
+    FROM Consulta C);
 
+----------------------------------------------- 
 SELECT M.Nome AS Med,  
        S.Nome_setor AS Setor_Medico 
 FROM Medico M 
@@ -55,6 +62,22 @@ SELECT M.Nome,
 FROM Medico M;
 
 -- Consulta 7: Subconsulta do Tipo Linha
+
+
+
+
+-- Função de agregação
+SELECT C.CRM, (
+    SELECT M1.NOME
+    FROM MEDICO M1 WHERE
+    M1.CRM = C.CRM
+) AS NOME, COUNT(*)
+FROM CONSULTA C
+GROUP BY C.CRM
+HAVING COUNT(*) > 1;
+
+-- Consulta 8: Subconsulta do Tipo Tabela
+
 SELECT M.Nome AS Medico, 
        (SELECT P.Nome 
         FROM Paciente P 
@@ -64,14 +87,13 @@ SELECT M.Nome AS Medico,
         LIMIT 1) AS Paciente_Recente
 FROM Medico M;
 
--- Consulta 8: Subconsulta do Tipo Tabela
 
 -- Projete o nome do medico, nome do paciente atendido e o medicamento receitado
 SELECT M.Nome AS Nome_Medico,(SELECT P.Nome  
-    						 FROM Paciente P 
-      						 WHERE P.CPF_Paciente = R.CPF_Paciente) AS Nome_Paciente, (SELECT MD.Nome  
-    																				  FROM Medicamento MD 
-     																				   WHERE MD.Cod = R.Cod_Medicamento) AS Nome_Medicamento 
+    				  FROM Paciente P 
+      				  WHERE P.CPF_Paciente = R.CPF_Paciente) AS Nome_Paciente, (SELECT MD.Nome  
+    														  FROM Medicamento MD 
+     														  WHERE MD.Cod = R.Cod_Medicamento) AS Nome_Medicamento 
 FROM Receita R JOIN Medico M ON R.CRM = M.CRM
 
 ------------------------------------------------------------------------------------------
