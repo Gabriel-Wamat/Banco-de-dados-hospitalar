@@ -115,3 +115,76 @@ CREATE TABLE Receita (
     CONSTRAINT fk_receita_medicamento FOREIGN KEY (Cod_Medicamento) REFERENCES Medicamento(Cod));
 
 
+------------------ TRIGGERS -------------
+
+--- Essa trigger verificar se o paciente já está internado em uma enfermaria
+
+CREATE OR REPLACE TRIGGER verifica_internacao
+BEFORE INSERT ON Interna_Quarto
+FOR EACH ROW
+DECLARE
+    v_enfermaria_count INT;
+BEGIN
+    SELECT COUNT(*)
+    INTO v_enfermaria_count
+    FROM Interna_Enfermaria
+    WHERE CPF_Paciente = :NEW.CPF_Paciente;
+
+    IF v_enfermaria_count > 0 THEN
+        RAISE_APPLICATION_ERROR(-20001, 'O paciente já está internado em uma enfermaria e não pode ser internado em um quarto.');
+    END IF;
+END;
+/
+
+
+-- Trigger sobre exclusão de médicos que são supervisores
+
+CREATE OR REPLACE TRIGGER verifica_supervisor
+BEFORE DELETE ON Medico
+FOR EACH ROW
+DECLARE
+    v_supervisados_count INT;
+BEGIN
+    SELECT COUNT(*)
+    INTO v_supervisados_count
+    FROM Medico
+    WHERE CRM_Supervisor = :OLD.CRM;
+
+    IF v_supervisados_count > 0 THEN
+        RAISE_APPLICATION_ERROR(-20003, 'Este médico é supervisor de outros médicos e não pode ser excluído.');
+    END IF;
+END;
+/
+
+
+
+------------------- PROCEDURE ------------------------------
+
+--- Procedure que permite inserir um médico sem precisar informar o CRM do supervisor
+CREATE OR REPLACE PROCEDURE inserir_medico(
+    p_CRM VARCHAR2,
+    p_Nome VARCHAR2
+)
+AS
+    v_CRM_Supervisor VARCHAR2(20);
+BEGIN
+    
+    SELECT CRM
+    INTO v_CRM_Supervisor
+    FROM Medico
+    WHERE CRM_Supervisor IS NULL 
+    ORDER BY CRM DESC
+    FETCH FIRST 1 ROWS ONLY;
+
+    INSERT INTO Medico (CRM, Nome, CRM_Supervisor)
+    VALUES (p_CRM, p_Nome, v_CRM_Supervisor);
+
+    COMMIT;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RAISE_APPLICATION_ERROR(-20002, 'Nenhum supervisor disponível para ser associado.');
+END;
+/
+
+
+
