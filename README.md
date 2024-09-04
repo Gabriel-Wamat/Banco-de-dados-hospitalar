@@ -62,3 +62,13 @@ O projeto inclui comandos para inserir 10 linhas de dados em cada tabela, fornec
 ## Objetivo
 
 O principal objetivo deste projeto é fornecer uma solução completa e integrada para o gerenciamento de dados em um ambiente hospitalar, permitindo a realização de operações complexas de forma eficiente e organizada.
+
+## GRUPO:
+
+- Gabriel Wamat - gabriel.walisson@ufpe.br
+
+- Maiara Lira - msl3@cin.ufpe.br
+
+- Marco Antonio Vasconcelos - mavff@cin.ufpe.br
+
+- Matheus Henrique Cabral - mhpc@cin.ufpe.br
