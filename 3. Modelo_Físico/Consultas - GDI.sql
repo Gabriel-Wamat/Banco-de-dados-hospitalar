@@ -101,7 +101,7 @@ WHERE CRM IN (
 SELECT M.Nome AS Nome_Medico,(SELECT P.Nome  
     				          FROM Paciente P 
       				          WHERE P.CPF_Paciente = R.CPF_Paciente) AS Nome_Paciente, 
-                                       (SELECT MD.Nome  
+                (SELECT MD.Nome  
     							  FROM Medicamento MD 
      							  WHERE MD.Cod = R.Cod_Medicamento) AS Nome_Medicamento 
 FROM Receita R JOIN Medico M ON R.CRM = M.CRM
