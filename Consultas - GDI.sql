@@ -5,10 +5,11 @@ GROUP BY Nome_Setor
 HAVING COUNT(*) > 2;
 
 -- Consulta 2: Junção Interna
-SELECT M.Nome AS Medico, P.Nome AS Paciente, C.Data
+SELECT M.Nome AS Medico, 
+       (SELECT H.CNPJ 
+        FROM Hospital H  
+        JOIN SETOR S ON H.CNPJ = S.CNPJ) 
 FROM Medico M
-INNER JOIN Consulta C ON M.CPF = C.CPF_Medico
-INNER JOIN Paciente P ON P.CPF = C.CPF_Paciente;
 
 -- Consulta 3: Junção Externa
 SELECT M.Nome AS Medico, P.Nome AS Paciente, C.Data
@@ -25,6 +26,18 @@ WHERE EXISTS (
     WHERE C.CPF_Medico = M.CPF
 );
 
+
+SELECT M.Nome AS Med,  
+       S.Nome_setor AS Setor_Medico 
+FROM Medico M 
+JOIN Setor S ON EXISTS ( 
+    SELECT * 
+    FROM Trabalha T 
+    WHERE T.CRM = M.CRM 
+    AND T.CNPJ = S.CNPJ 
+    AND T.Nome_setor = S.Nome_setor)
+
+    
 -- Consulta 5: Anti-Junção
 SELECT M.Nome
 FROM Medico M
@@ -52,6 +65,17 @@ SELECT M.Nome AS Medico,
 FROM Medico M;
 
 -- Consulta 8: Subconsulta do Tipo Tabela
+
+-- Projete o nome do medico, nome do paciente atendido e o medicamento receitado
+SELECT M.Nome AS Nome_Medico,(SELECT P.Nome  
+    						 FROM Paciente P 
+      						 WHERE P.CPF_Paciente = R.CPF_Paciente) AS Nome_Paciente, (SELECT MD.Nome  
+    																				  FROM Medicamento MD 
+     																				   WHERE MD.Cod = R.Cod_Medicamento) AS Nome_Medicamento 
+FROM Receita R JOIN Medico M ON R.CRM = M.CRM
+
+------------------------------------------------------------------------------------------
+    
 SELECT M.Nome, C.Data
 FROM Medico M
 JOIN (
@@ -61,8 +85,9 @@ JOIN (
 ) AS C ON M.CPF = C.CPF_Medico;
 
 -- Consulta 9: Operação de Conjunto (Union)
-SELECT CPF, Nome 
+SELECT CRM, Nome 
 FROM Medico
 UNION
-SELECT CPF, Nome 
+SELECT CPF_paciente, Nome 
 FROM Paciente;
+
