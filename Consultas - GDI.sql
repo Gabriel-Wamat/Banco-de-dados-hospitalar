@@ -63,8 +63,7 @@ FROM Medico M
 WHERE NOT EXISTS (
     SELECT 1
     FROM Consulta C
-    WHERE C.CPF_Medico = M.CPF
-);
+    WHERE C.CRM = M.CRM);
 
 -- Consulta 6: Subconsulta do Tipo Escalar
 SELECT M.Nome, 
